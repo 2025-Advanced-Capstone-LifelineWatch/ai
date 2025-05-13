@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-ai-deploy
+  namespace: test-back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-ai
+  template:
+    metadata:
+      labels:
+        app: flask-ai
+    spec:
+      containers:
+        - name: flask-ai
+          image: hjh-test-registry.kr.ncr.ntruss.com/ai-01:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-secret
+                  key: api-key
