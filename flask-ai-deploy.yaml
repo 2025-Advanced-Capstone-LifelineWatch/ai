@@ -13,9 +13,12 @@ spec:
       labels:
         app: flask-ai
     spec:
+      imagePullSecrets:
+        - name: regcred  # 🔐 인증 비밀키 참조
       containers:
         - name: flask-ai
           image: hjh-test-registry.kr.ncr.ntruss.com/ai-01:latest
+          imagePullPolicy: Always  # (기본값이 "latest" 태그면 Always입니다)
           ports:
             - containerPort: 8000
           env:
