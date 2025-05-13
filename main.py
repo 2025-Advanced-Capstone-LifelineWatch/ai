@@ -16,7 +16,7 @@ thresholds = {
     "Caloricexpenditure": (100, None)
 }
 
-model = joblib.load("/home/dm-potato/dm-geon/final_capston/emergency_detection_caption/xgboost_emergency_model.pkl")
+model = joblib.load("xgboost_emergency_model.pkl")
 
 def detect_abnormal_features(data, thresholds):
     abnormal = {}
@@ -39,7 +39,7 @@ def clean_output(text):
         text = text[:-1]
     return text
 
-@app.route("ai/predict", methods=["POST"])
+@app.route("/ai/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
