@@ -2,4 +2,4 @@ flask
 pandas
 joblib
 openai
-xgboost
+xgboost==1.7.6

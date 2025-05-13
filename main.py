@@ -38,6 +38,9 @@ def clean_output(text):
     elif text.endswith("다.") and len(text) > 2 and text[-3] == ".":
         text = text[:-1]
     return text
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"}), 200
 
 @app.route("/ai/predict", methods=["POST"])
 def predict():
