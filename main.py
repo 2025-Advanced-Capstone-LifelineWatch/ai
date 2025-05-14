@@ -18,7 +18,7 @@ thresholds = {
     "Caloricexpenditure": (100, None)
 }
 
-model = joblib.load("/home/dm-potato/dm-geon/final_capston/emergency_detection_caption/xgboost_emergency_model.pkl")
+model = joblib.load("/app/model/xgboost_emergency_model.pkl")
 
 def detect_abnormal_features(data, thresholds, timestamp_str):
     abnormal = {}
