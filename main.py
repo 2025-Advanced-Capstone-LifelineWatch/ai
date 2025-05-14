@@ -20,14 +20,15 @@ thresholds = {
 
 model = joblib.load("xgboost_emergency_model.pkl")
 
-def detect_abnormal_features(data, thresholds, timestamp_str):
+def detect_abnormal_features(data, thresholds, timestamp_str=None):
     abnormal = {}
     try:
-        timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
+        timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M") if timestamp_str else None
     except Exception:
         timestamp = None
 
     for key, value in data.items():
+        # 하루 종료 시각에만 걸음수/칼로리 판단
         if key in ["Walking_steps", "Caloricexpenditure"]:
             if not (timestamp and timestamp.hour == 23 and timestamp.minute == 59):
                 continue
@@ -49,10 +50,10 @@ def clean_output(text):
     elif text.endswith("다.") and len(text) > 2 and text[-3] == ".":
         text = text[:-1]
     return text
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"}), 200
-
 
 @app.route("/ai/predict", methods=["POST"])
 def predict():
@@ -62,10 +63,11 @@ def predict():
         elderly_id = data.get("elderlyId")
         timestamp_str = data.get("timestamp")
 
+        # elderlyId와 timestamp는 선택적으로 처리 (없으면 경고 없이 None)
         if elderly_id is None:
-            return jsonify({"error": "'elderlyId' is required."}), 400
+            print("⚠️ elderlyId 누락됨. 백엔드 전송은 생략됨.")
         if timestamp_str is None:
-            return jsonify({"error": "'timestamp' (e.g., '2025-05-14 23:59') is required."}), 400
+            print("⚠️ timestamp 누락됨. 걸음수/칼로리 판단이 제한될 수 있음.")
 
         input_data = {}
         for feat in required_features:
@@ -119,16 +121,17 @@ def predict():
             "explanation": explanation_text
         }
 
-        try:
-            backend_url = "https://server.lifewatch.store/api/alert/emergency"
-            headers = {"Content-Type": "application/json"}
-            backend_response = requests.post(backend_url, json=payload, headers=headers)
-            if backend_response.status_code != 200:
-                print("⚠️ 백엔드 응답 실패:", backend_response.status_code, backend_response.text)
-            else:
-                print("✅ 백엔드 전송 성공:", backend_response.status_code)
-        except Exception as be:
-            print("⚠️ 백엔드 전송 예외:", str(be))
+        if elderly_id:
+            try:
+                backend_url = "https://server.lifewatch.store/api/alert/emergency"
+                headers = {"Content-Type": "application/json"}
+                backend_response = requests.post(backend_url, json=payload, headers=headers)
+                if backend_response.status_code != 200:
+                    print("⚠️ 백엔드 응답 실패:", backend_response.status_code, backend_response.text)
+                else:
+                    print("✅ 백엔드 전송 성공:", backend_response.status_code)
+            except Exception as be:
+                print("⚠️ 백엔드 전송 예외:", str(be))
 
         return jsonify(payload)
 

@@ -4,3 +4,4 @@ joblib
 openai
 xgboost==1.7.5
 scikit-learn
+requests
