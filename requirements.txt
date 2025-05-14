@@ -2,4 +2,5 @@ flask
 pandas
 joblib
 openai
-xgboost==1.7.6
+xgboost==1.7.5
+scikit-learn
